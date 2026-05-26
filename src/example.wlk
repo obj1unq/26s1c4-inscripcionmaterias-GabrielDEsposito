@@ -1,8 +1,7 @@
 class Estudiante {
     const materiasAprobadas = #{}
-	
-    
-    method cantMateriasAprobadas() = materiasAprobadas.size()
+	const carreras = #{}
+	const creditosTotales = 0
 
     method aprobar(materia, nota) {
       if (self.aprobo(materia)){
@@ -11,33 +10,96 @@ class Estudiante {
       materiasAprobadas.add(new MateriaAprobada(materia = materia, nota = nota))
     }
 
-	method aprobo(materia) = materiasAprobadas.any({}) //recibe bloque dentro del parentesis
+	
+	//method aprobo(materia) = materiasAprobadas.any({materia => materia.esMateriaAprobada(materia)}) 
+	method aprobo(materia) = materiasAprobadas.contains(materia)
+	//method aprobo(materia) = materiasAprobadas.any({materia => materia == materia}) 
+	method esMateriaAprobada(_materia) = materiasAprobadas.contains(_materia) // preguntar si esta bien 
 
-	method promedio() =  self.cantMateriasAprobadas().average()
 
-	/*method materiasTotales() = self.materiasAprobadas().flatten() */
-	method estaYaInscripto(materia) {
-		if(!estudiante.tieneCorrelativas(materia)){
-			self.error("...")
-		}
+	method sumaDeMateriasAprobadas() = materiasAprobadas.sum({materia => MateriaAprobada.nota() })
+	
 
-	}
+	method promedio() =  materiasAprobadas.average({ materia => MateriaAprobada.nota() })
+
+	method materiasQueEstaInscriptoDeCarreras() = carreras.materias().flatten()
+	
+	method cantMateriasAprobadas() = materiasAprobadas.size()
+
+	method materiasTotales() = carreras.map({carrera => carrera.materias()}).flatten() //ver 
+	
+	method materiasQueSePuedeInscribir(carrera) {
+		if(!carreras.contains(carrera))
+			{self.error("No cursa esta carrera")}
+		else
+			carrera.materias().filter({materia => materia.puedeInscribirse(self)}) 
+	} 
+
+	method materiasInscripto() = self.materiasTotales().filter({materia => materia.estaInscripto(self)})
+	
+	method creditosTotales() = creditosTotales 
+
+	
+	
 
 }	
 
 class MateriaAprobada{
+	const materia = null
+	const nota = 0
 
+	method materia() = materia
+	method nota() = nota 
+	
 	
 }
 
 class Materia{
-	method puedeInscribirse(estudiante, materia) =  !estudiante.aprobo(materia) and !self.estaYaInscripto(materia) and self.tieneCorrelativas(materia)
+	const inscriptos = #{}
+	const correlativas = #{}
+	const listaDeEspera = []
+	const cupo = 30
+	
+	method puedeInscribirse(estudiante) =  estudiante.materiasTotales().contains(self) and !estudiante.aprobo(self) and !self.estaInscripto(estudiante) and self.tieneAprobadasCorrelativas(estudiante)  // 
 
+	method estaInscripto(estudiante) = inscriptos.contains(estudiante) 
+
+	method inscribir(estudiante) {
+		if(!self.puedeInscribirse(estudiante)){
+			self.error("No cumple las condiciones")
+		
+		}
+		self.verificarCupoParaInscribir(estudiante)	
+	} 
+
+	method verificarCupoParaInscribir(estudiante) {
+		if(inscriptos <= cupo){
+			listaDeEspera.add(estudiante)
+		}
+		inscriptos.add(estudiante)
+	}
+
+	method tieneAprobadasCorrelativas(estudiante) = correlativas.all({materia => estudiante.aprobo(materia)})
+
+	method darDeBaja(estudiante) {
+	  inscriptos.remove(estudiante)
+	  if(!listaDeEspera.isEmpty()){
+		inscriptos.add(listaDeEspera.first())
+	  }
+	} 
+
+	method puedeHacerTrabajoFinal(estudiante) = estudiante.creditosTotales() > 250
+
+	method inscriptos() = inscriptos // Los estudiantes inscriptos a una materia dada.
+	method listaDeEspera() = listaDeEspera  // Los estudiantes en lista de espera para una materia dada.
 
 	
 }
 
 class Carrera {
+  const materias = #{}
+
+  method materias() = materias 
   
 }
 

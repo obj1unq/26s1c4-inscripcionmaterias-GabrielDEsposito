@@ -11,10 +11,9 @@ class Estudiante {
     }
 
 	
-	//method aprobo(materia) = materiasAprobadas.any({materia => materia.esMateriaAprobada(materia)}) 
-	method aprobo(materia) = materiasAprobadas.contains(materia)
-	//method aprobo(materia) = materiasAprobadas.any({materia => materia == materia}) 
-	method esMateriaAprobada(_materia) = materiasAprobadas.contains(_materia) // preguntar si esta bien 
+
+	method aprobo(materia) = materiasAprobadas.any({ materiaAprobada => materiaAprobada.materia() == materia })
+	
 
 
 	method sumaDeMateriasAprobadas() = materiasAprobadas.sum({materia => MateriaAprobada.nota() })
@@ -58,7 +57,7 @@ class Materia{
 	const inscriptos = #{}
 	const correlativas = #{}
 	const listaDeEspera = []
-	const cupo = 30
+	const cupo = 0
 	
 	method puedeInscribirse(estudiante) =  estudiante.materiasTotales().contains(self) and !estudiante.aprobo(self) and !self.estaInscripto(estudiante) and self.tieneAprobadasCorrelativas(estudiante)  // 
 
@@ -72,21 +71,25 @@ class Materia{
 		self.verificarCupoParaInscribir(estudiante)	
 	} 
 
+
 	method verificarCupoParaInscribir(estudiante) {
-		if(inscriptos <= cupo){
-			listaDeEspera.add(estudiante)
-		}
-		inscriptos.add(estudiante)
-	}
+      if(inscriptos.size() < cupo){
+        inscriptos.add(estudiante)
+      } else {
+        listaDeEspera.add(estudiante)
+      }
+    }
 
 	method tieneAprobadasCorrelativas(estudiante) = correlativas.all({materia => estudiante.aprobo(materia)})
 
 	method darDeBaja(estudiante) {
-	  inscriptos.remove(estudiante)
-	  if(!listaDeEspera.isEmpty()){
-		inscriptos.add(listaDeEspera.first())
-	  }
-	} 
+      inscriptos.remove(estudiante)
+      if(!listaDeEspera.isEmpty()){
+        const primeroEnEspera = listaDeEspera.first()
+        inscriptos.add(primeroEnEspera)
+        listaDeEspera.remove(primeroEnEspera)
+      }
+    }
 
 	method puedeHacerTrabajoFinal(estudiante) = estudiante.creditosTotales() > 250
 

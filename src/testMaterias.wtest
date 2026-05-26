@@ -1,0 +1,92 @@
+import example.*
+
+
+// TESTS
+
+// Suponiendo que
+
+// los requisitos de Objetos 2 son Objetos 1 y Matemática 1.
+// Los requisitos de Objetos 3 son Objetos 2 y Bases de Datos.
+// Los requisitos de Programación Concurrente son Objetos 1 y Bases de Datos.
+// Biología 2 tiene como único requisito a Biología 1.
+// Roque tiene aprobadas Elementos de Programación, Matemática 1, Objetos 1, Bases de Datos, Química y Biología 1.
+// Tenemos a: Luisa, Romina y Alicia que aprobaron Elementos de Programación, Objetos 1, y Matemática 1; Ana que aprobó solamente Elementos de Programación. Todas están cursando Programación Concurrente.
+// Objetos 2 tiene cupo para 3 estudiantes.
+
+describe "tests de roque" {
+
+    const elementosDeProgramacion = new Materia()
+    const matematica1 = new Materia()
+    const basesDeDatos = new Materia()
+    const quimica = new Materia()
+    const biologia1 = new Materia()
+   
+
+    const objetos1 = new Materia()
+    const objetos2 = new Materia(correlativas = #{objetos1, matematica1}, cupo = 3)
+    const objetos3 = new Materia(correlativas = #{objetos2, basesDeDatos})
+    const programacionConcurrente = new Materia(correlativas = #{objetos1, basesDeDatos})
+
+
+    const carreraProgramacion = new Carrera(materias = #{elementosDeProgramacion, matematica1, basesDeDatos, objetos1, objetos2, objetos3, programacionConcurrente})
+    
+    const roque = new Estudiante(carreras = #{carreraProgramacion })
+    const luisa = new Estudiante(carreras = #{carreraProgramacion})
+    const romina = new Estudiante(carreras = #{carreraProgramacion})
+    const alicia = new Estudiante(carreras = #{carreraProgramacion})
+    
+    method initialize() {
+
+        roque.aprobar(elementosDeProgramacion, 8)
+        roque.aprobar(matematica1, 9)
+        roque.aprobar(objetos1, 7)
+        roque.aprobar(basesDeDatos, 8)
+        roque.aprobar(quimica, 6)
+        roque.aprobar(biologia1, 7)
+
+
+
+        [luisa, romina, alicia].forEach({ c => 
+            c.aprobar(elementosDeProgramacion, 8)
+            c.aprobar(objetos1, 7)
+            c.aprobar(matematica1, 9)
+        })
+
+    }
+    // TESTS:
+    test "Roque puede inscribirse en Objetos 2 pero no en Objetos 3 ni en Objetos 1" {
+	
+        assert.that(objetos2.puedeInscribirse(roque))
+        assert.notThat(objetos3.puedeInscribirse(roque))
+        assert.notThat(objetos1.puedeInscribirse(roque))
+	}
+
+
+	test "Si se inscriben, en este orden, Luisa, Romina, Alicia y Roque en Objetos 2, entonces las tres primeras quedan confirmadas, y Roque queda en lista de espera."{
+		objetos2.inscribir(luisa)
+		objetos2.inscribir(romina)
+		objetos2.inscribir(alicia)
+		objetos2.inscribir(roque)
+
+		assert.equals([roque], objetos2.listaDeEspera())
+		
+	}
+
+	test " Si después se da de baja Romina en Objetos 2, entonces Roque pasa a tener la inscripción confirmada en esa materia."{
+	
+		objetos2.inscribir(luisa)
+		objetos2.inscribir(romina)
+		objetos2.inscribir(alicia)
+		objetos2.inscribir(roque)
+
+
+		objetos2.darDeBaja(romina)
+		
+		assert.equals(#{luisa, alicia, roque}, objetos2.inscriptos())
+	}
+
+
+
+
+}
+
